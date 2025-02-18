@@ -1,24 +1,32 @@
 const express = require("express");
 const app = express();
-const authorize = require("./authorize");
-const logger = require("./logger");
-// req = > middleware => res
+let { people } = require("./data");
 
-app.use([logger, authorize]);
+app.use(express.static("./methods-public"));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
-app.get("/about", (req, res) => {
-  res.send("Hello aboout");
-});
-app.get("/api/products", (req, res) => {
-  res.send("Products");
-});
-app.get("/api/items", logger, (req, res) => {
-  res.send("items");
+app.get("/api/people", (req, res) => {
+  res.status(200).json({ sucess: true, data: people });
 });
 
+app.post("/api/people", (req, res) => {
+  const { name } = req.body;
+  if (!name) {
+    return res
+      .status(400)
+      .json({ sucess: false, msg: "please provide name value" });
+  }
+  res.status(201).send({ sucess: true, person: name });
+});
+
+app.post("/login", (req, res) => {
+  const { name } = req.body;
+  if (name) {
+    return res.status(200).send(`Welcome ${name}`);
+  }
+  res.status(401).send("please dont leave empty");
+});
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
