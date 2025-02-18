@@ -1,44 +1,22 @@
 const express = require("express");
 const app = express();
-const { products } = require("./data");
+const authorize = require("./authorize");
+const logger = require("./logger");
+// req = > middleware => res
+
+app.use([logger, authorize]);
 
 app.get("/", (req, res) => {
-  res.send('<h1>Home Page<h1/><a href="/products">products</a>');
+  res.send("Hello World");
 });
-app.get("/products", (req, res) => {
-  res.json(products.map(({ id, name, image }) => ({ id, name, image })));
+app.get("/about", (req, res) => {
+  res.send("Hello aboout");
 });
-
-app.get("/products/:productID", (req, res) => {
-  const { productID } = req.params;
-  const singleProduct = products.find((p) => p.id === Number(productID));
-  if (!singleProduct) {
-    return res.status(404).send("Product does not exist");
-  }
-  res.json(singleProduct);
+app.get("/api/products", (req, res) => {
+  res.send("Products");
 });
-
-app.get("/products/:productID/reviews/:reviewID", (req, res) => {
-  console.log(req.params);
-  res.send("Hello world");
-});
-
-app.get("/v1/query", (req, res) => {
-  //console.log(req.query);
-  const { search, limit } = req.query;
-  let sortedProdutcs = [...products];
-  if (search) {
-    sortedProdutcs = sortedProdutcs.filter((product) => {
-      return product.name.startsWith(search);
-    });
-  }
-  if (limit) {
-    sortedProdutcs = sortedProdutcs.slice(0, Number(limit));
-  }
-  if (sortedProdutcs.length < 1) {
-    return res.status(200).json({ success: true, data: [] });
-  }
-  return res.status(200).json(sortedProdutcs);
+app.get("/api/items", logger, (req, res) => {
+  res.send("items");
 });
 
 app.listen(3000, () => {
